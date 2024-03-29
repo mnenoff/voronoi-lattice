@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voronoi Diagram</title>
+    <style>
+        body { display: flex; justify-content: center; margin-top: 50px; }
+        canvas { border: 1px solid black; }
+    </style>
+</head>
+<body>
+    <canvas id="voronoiCanvas" width="500" height="500"></canvas>
+    <script>
+        const canvas = document.getElementById('voronoiCanvas');
+        const ctx = canvas.getContext('2d');
+        const points = [];
+        const width = canvas.width;
+        const height = canvas.height;
+        const numPoints = 50;
+
+        // Generate random points
+        for (let i = 0; i < numPoints; i++) {
+            points.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                color: `hsl(${Math.random() * 360}, 100%, 75%)`
+            });
+        }
+
+        function drawVoronoi() {
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data;
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    let closestPoint = null;
+                    let minDist = Infinity;
+                    points.forEach(point => {
+                        const dist = Math.sqrt((point.x - x) ** 2 + (point.y - y) ** 2);
+                        if (dist < minDist) {
+                            closestPoint = point;
+                            minDist = dist;
+                        }
+                    });
+
+                    const index = (y * width + x) * 4;
+                    const color = closestPoint.color.match(/\d+/g).map(Number);
+                    data[index] = color[0]; // R
+                    data[index + 1] = color[1]; // G
+                    data[index + 2] = color[2]; // B
+                    data[index + 3] = 255; // A
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+
+            // Draw points
+            points.forEach(point => {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI);
+                ctx.fillStyle = 'black';
+                ctx.fill();
+            });
+        }
+
+        drawVoronoi();
+    </script>
+</body>
+</html>
